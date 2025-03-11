@@ -12,18 +12,21 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
     @Published var searchWebViewStore: WebViewStore?
     @Published var communityWebViewStore: WebViewStore?
     @Published var myPageWebViewStore: WebViewStore?
+    @Published var scanWebViewStore: WebViewStore?
     
     // 각 탭별 로딩 상태
     @Published var isHomeLoading = false
     @Published var isSearchLoading = false
     @Published var isCommunityLoading = false
     @Published var isMyPageLoading = false
+    @Published var isScanLoading = false
     
     // 각 탭별 URL
     private var homeURL: URL?
     private var searchURL: URL?
     private var communityURL: URL?
     private var myPageURL: URL?
+    private var scanURL: URL?
     
     // 초기화 완료 여부
     private var isInitialized = false
@@ -74,6 +77,11 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
         } else {
             print("마이페이지 URL 생성 실패")
         }
+        
+        // 스캔 URL 설정
+        if let url = URL(string: "\(baseURLString)/scan") {
+            scanURL = url
+        }
     }
     
     // 로컬 IP 주소를 가져오는 함수
@@ -121,83 +129,104 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
         #endif
     }
     
-    // 모든 웹뷰 초기화 및 사전 로드
+    // 웹뷰 초기화 함수
     func initializeWebViews() {
-        guard !isInitialized else { return }
-        
-        // 메인 스레드에서 실행 중인지 확인
-        if !Thread.isMainThread {
-            print("경고: WebView 초기화는 메인 스레드에서 수행되어야 합니다.")
-            DispatchQueue.main.sync {
-                self.initializeWebViews()
-            }
+        if isInitialized {
             return
         }
         
-        print("웹뷰 초기화 시작 - 메인 스레드: \(Thread.isMainThread)")
+        // 각 탭별 웹뷰 초기화
+        initializeTabWebViews()
         
-        // 초기화 시도 횟수 제한
-        let maxRetries = 3
-        var retryCount = 0
-        var success = false
+        isInitialized = true
+    }
+    
+    // 각 탭별 웹뷰 초기화
+    private func initializeTabWebViews() {
+        // 홈 웹뷰 초기화
+        if homeWebViewStore == nil, let homeURL = homeURL {
+            let webView = createConfiguredWebView()
+            homeWebViewStore = WebViewStore(webView: webView)
+            isHomeLoading = true
+            webView.load(URLRequest(url: homeURL))
+        }
         
-        while !success && retryCount < maxRetries {
-            do {
-                // 안전하게 URL 확인 후 웹뷰 초기화
-                if let homeURL = homeURL {
-                    // 홈 웹뷰 초기화
-                    let homeConfiguration = createWebViewConfiguration()
-                    let homeWebView = WKWebView(frame: .zero, configuration: homeConfiguration)
-                    configureWebView(homeWebView)
-                    homeWebViewStore = WebViewStore(webView: homeWebView)
-                    loadURL(homeURL, in: homeWebView)
-                }
-                
-                if let searchURL = searchURL {
-                    // 검색 웹뷰 초기화
-                    let searchConfiguration = createWebViewConfiguration()
-                    let searchWebView = WKWebView(frame: .zero, configuration: searchConfiguration)
-                    configureWebView(searchWebView)
-                    searchWebViewStore = WebViewStore(webView: searchWebView)
-                    loadURL(searchURL, in: searchWebView)
-                }
-                
-                if let communityURL = communityURL {
-                    // 커뮤니티 웹뷰 초기화
-                    let communityConfiguration = createWebViewConfiguration()
-                    let communityWebView = WKWebView(frame: .zero, configuration: communityConfiguration)
-                    configureWebView(communityWebView)
-                    communityWebViewStore = WebViewStore(webView: communityWebView)
-                    loadURL(communityURL, in: communityWebView)
-                }
-                
-                if let myPageURL = myPageURL {
-                    // 마이페이지 웹뷰 초기화
-                    let myPageConfiguration = createWebViewConfiguration()
-                    let myPageWebView = WKWebView(frame: .zero, configuration: myPageConfiguration)
-                    configureWebView(myPageWebView)
-                    myPageWebViewStore = WebViewStore(webView: myPageWebView)
-                    loadURL(myPageURL, in: myPageWebView)
-                }
-                
-                success = true
-            } catch {
-                print("웹뷰 초기화 오류 (시도 \(retryCount + 1)/\(maxRetries)): \(error.localizedDescription)")
-                retryCount += 1
-                
-                // 실패한 경우 잠시 대기 후 재시도
-                if retryCount < maxRetries {
-                    Thread.sleep(forTimeInterval: 0.5)
-                }
+        // 검색 웹뷰 초기화
+        if searchWebViewStore == nil, let searchURL = searchURL {
+            let webView = createConfiguredWebView()
+            searchWebViewStore = WebViewStore(webView: webView)
+            isSearchLoading = true
+            webView.load(URLRequest(url: searchURL))
+        }
+        
+        // 커뮤니티 웹뷰 초기화
+        if communityWebViewStore == nil, let communityURL = communityURL {
+            let webView = createConfiguredWebView()
+            communityWebViewStore = WebViewStore(webView: webView)
+            isCommunityLoading = true
+            webView.load(URLRequest(url: communityURL))
+        }
+        
+        // 마이페이지 웹뷰 초기화
+        if myPageWebViewStore == nil, let myPageURL = myPageURL {
+            let webView = createConfiguredWebView()
+            myPageWebViewStore = WebViewStore(webView: webView)
+            isMyPageLoading = true
+            webView.load(URLRequest(url: myPageURL))
+        }
+        
+        // 스캔 웹뷰 초기화
+        if scanWebViewStore == nil, let scanURL = scanURL {
+            let webView = createConfiguredWebView()
+            scanWebViewStore = WebViewStore(webView: webView)
+            isScanLoading = true
+            webView.load(URLRequest(url: scanURL))
+        }
+    }
+    
+    // 설정된 웹뷰 생성
+    private func createConfiguredWebView() -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        
+        // 사용자 에이전트 설정
+        let userAgent = "CheckMoodUMM-iOS/\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")"
+        
+        // 웹뷰 생성
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.customUserAgent = userAgent
+        webView.navigationDelegate = self
+        
+        // 자바스크립트 인터페이스 설정
+        setupJavaScriptInterface(webView)
+        
+        return webView
+    }
+    
+    // 자바스크립트 인터페이스 설정
+    private func setupJavaScriptInterface(_ webView: WKWebView) {
+        // 자바스크립트 메시지 핸들러 추가
+        webView.configuration.userContentController.add(self, name: "nativeApp")
+        
+        // 네이티브 앱 환경 표시를 위한 스크립트 추가
+        let script = """
+        document.documentElement.classList.add('native-app-html');
+        window.isNativeApp = true;
+        window.nativeAppVersion = '\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")';
+        window.nativeAppPlatform = 'ios';
+        
+        // 바코드 스캐너 인터페이스
+        window.webkit.messageHandlers.barcodeScanner = {
+            postMessage: function(message) {
+                window.webkit.messageHandlers.nativeApp.postMessage({
+                    type: 'barcodeScanner',
+                    action: message.action
+                });
             }
-        }
+        };
+        """
         
-        if success {
-            isInitialized = true
-            print("모든 웹뷰 초기화 완료")
-        } else {
-            print("웹뷰 초기화 실패: 최대 시도 횟수 초과")
-        }
+        let userScript = WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        webView.configuration.userContentController.addUserScript(userScript)
     }
     
     // 웹뷰 설정 생성
@@ -410,6 +439,7 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
         searchWebViewStore?.webView.reload()
         communityWebViewStore?.webView.reload()
         myPageWebViewStore?.webView.reload()
+        scanWebViewStore?.webView.reload()
     }
     
     // 초기화 상태 확인 메서드
@@ -432,6 +462,8 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
             isCommunityLoading = true
         } else if webView == myPageWebViewStore?.webView {
             isMyPageLoading = true
+        } else if webView == scanWebViewStore?.webView {
+            isScanLoading = true
         }
     }
     
@@ -448,6 +480,8 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
             isCommunityLoading = false
         } else if webView == myPageWebViewStore?.webView {
             isMyPageLoading = false
+        } else if webView == scanWebViewStore?.webView {
+            isScanLoading = false
         }
         
         // 페이지 로딩 완료 후 스크립트 실행
@@ -486,6 +520,8 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
             isCommunityLoading = false
         } else if webView == myPageWebViewStore?.webView {
             isMyPageLoading = false
+        } else if webView == scanWebViewStore?.webView {
+            isScanLoading = false
         }
     }
     
@@ -493,23 +529,62 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
     
     // JavaScript에서 보낸 메시지 처리
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard let messageBody = message.body as? [String: Any] else { return }
+        // 메시지 처리
+        guard let body = message.body as? [String: Any] else {
+            print("메시지 형식 오류")
+            return
+        }
         
-        switch message.name {
-        case "login":
-            handleLogin(messageBody)
-        case "share":
-            handleShare(messageBody)
-        case "notification":
-            handleNotification(messageBody)
-        case "bookInfo":
-            handleBookInfo(messageBody)
-        case "nativeUI":
-            handleNativeUI(messageBody)
-        case "navigation":
-            handleNavigation(messageBody)
+        // 메시지 타입 확인
+        if let type = body["type"] as? String {
+            switch type {
+            case "barcodeScanner":
+                // 바코드 스캐너 관련 메시지 처리
+                handleBarcodeScannerMessage(body)
+            default:
+                print("알 수 없는 메시지 타입: \(type)")
+            }
+        }
+    }
+    
+    // 바코드 스캐너 메시지 처리
+    private func handleBarcodeScannerMessage(_ message: [String: Any]) {
+        // 액션 확인
+        guard let action = message["action"] as? String else {
+            print("바코드 스캐너 액션 누락")
+            return
+        }
+        
+        // 액션에 따른 처리
+        switch action {
+        case "start":
+            // 메인 스레드에서 실행
+            DispatchQueue.main.async {
+                // 스캔 뷰 컨트롤러 표시
+                if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                    let scannerVC = BarcodeScannerViewController()
+                    scannerVC.onScan = { [weak self] isbn in
+                        // 스캔 결과를 웹뷰에 전달
+                        self?.sendISBNToWebView(isbn)
+                    }
+                    rootViewController.present(scannerVC, animated: true)
+                }
+            }
         default:
-            print("Unknown message: \(message.name)")
+            print("알 수 없는 바코드 스캐너 액션: \(action)")
+        }
+    }
+    
+    // 스캔 결과를 웹뷰에 전달
+    private func sendISBNToWebView(_ isbn: String) {
+        // 스캔 웹뷰에 결과 전달
+        if let webView = scanWebViewStore?.webView {
+            let jsCode = "window.handleBarcodeResult('\(isbn)');"
+            webView.evaluateJavaScript(jsCode) { result, error in
+                if let error = error {
+                    print("JavaScript 실행 오류: \(error)")
+                }
+            }
         }
     }
     
@@ -635,5 +710,31 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
                 userInfo: ["tabIndex": tabIndex]
             )
         }
+    }
+    
+    // 스캔 웹뷰 초기화
+    func initializeScanWebView() {
+        // 이미 초기화된 경우 리턴
+        if scanWebViewStore != nil {
+            return
+        }
+        
+        // 스캔 URL 확인
+        guard let scanURL = scanURL else {
+            print("스캔 URL이 설정되지 않았습니다.")
+            return
+        }
+        
+        // 웹뷰 생성
+        let webView = createConfiguredWebView()
+        scanWebViewStore = WebViewStore(webView: webView)
+        
+        // 로딩 상태 설정
+        isScanLoading = true
+        
+        // URL 로드
+        webView.load(URLRequest(url: scanURL))
+        
+        print("스캔 웹뷰 초기화 완료: \(scanURL)")
     }
 } 

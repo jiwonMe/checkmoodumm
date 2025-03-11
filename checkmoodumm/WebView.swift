@@ -1,5 +1,5 @@
 import SwiftUI
-import WebKit
+@preconcurrency import WebKit
 import UserNotifications
 import Network
 
@@ -771,7 +771,7 @@ struct WebView: UIViewRepresentable {
 }
 
 // WebView 인스턴스를 저장하는 클래스
-class WebViewStore: ObservableObject {
+class WebViewStore: NSObject, ObservableObject {
     let webView: WKWebView
     @Published var isNavBarHidden: Bool = false
     @Published var canGoBack: Bool = false
@@ -783,22 +783,16 @@ class WebViewStore: ObservableObject {
     private var scrollDebounceTimer: Timer?
     private var isUserScrolling = false
     private var navigationObserver: NSKeyValueObservation?
+    private var scrollViewDelegate: ScrollViewDelegate?
     
     init(webView: WKWebView) {
         self.webView = webView
+        // 모든 속성이 초기화된 후에 super.init() 호출
+        super.init()
         
-        // 스크롤 변경 알림 구독
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleScrollChange),
-            name: NSNotification.Name("WebViewScrollChanged"),
-            object: nil
-        )
-        
-        // 스크롤뷰 델리게이트 설정
-        webView.scrollView.delegate = ScrollViewDelegate(store: self)
-        
-        // 네비게이션 상태 관찰
+        // super.init() 이후에 모든 설정 메서드 호출
+        setupScrollObserver()
+        setupScrollViewDelegate()
         setupNavigationStateObserver()
     }
     
@@ -806,6 +800,23 @@ class WebViewStore: ObservableObject {
         NotificationCenter.default.removeObserver(self)
         scrollDebounceTimer?.invalidate()
         navigationObserver?.invalidate()
+    }
+    
+    // 원래의 setupObservers 메서드를 세 개의 독립적인 메서드로 분리
+    private func setupScrollObserver() {
+        // 스크롤 변경 알림 구독
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleScrollChange),
+            name: NSNotification.Name("WebViewScrollChanged"),
+            object: nil
+        )
+    }
+    
+    private func setupScrollViewDelegate() {
+        // 스크롤뷰 델리게이트 설정
+        scrollViewDelegate = ScrollViewDelegate(store: self)
+        webView.scrollView.delegate = scrollViewDelegate
     }
     
     private func setupNavigationStateObserver() {
@@ -817,7 +828,7 @@ class WebViewStore: ObservableObject {
         }
         
         // canGoForward 속성 관찰
-        let forwardObserver = webView.observe(\.canGoForward) { [weak self] webView, _ in
+        _ = webView.observe(\.canGoForward) { [weak self] webView, _ in
             DispatchQueue.main.async {
                 self?.canGoForward = webView.canGoForward
             }
@@ -875,6 +886,20 @@ class WebViewStore: ObservableObject {
     func goForward() {
         if webView.canGoForward {
             webView.goForward()
+        }
+    }
+    
+    // KVO 콜백
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == #keyPath(WKWebView.isLoading) {
+            if let isLoading = change?[.newKey] as? Bool {
+                // 로드 상태 변경 알림
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("WebViewLoadingChanged"),
+                    object: nil,
+                    userInfo: ["isLoading": isLoading]
+                )
+            }
         }
     }
 }

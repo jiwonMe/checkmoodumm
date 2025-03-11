@@ -42,19 +42,26 @@ struct MainTabView: View {
                 }
                 .tag(1)
             
+            ScanView()
+                .tabItem {
+                    Image(systemName: "barcode.viewfinder")
+                    Text("스캔")
+                }
+                .tag(2)
+            
             CommunityView()
                 .tabItem {
                     Image(systemName: "person.3.fill")
                     Text("커뮤니티")
                 }
-                .tag(2)
+                .tag(3)
             
             MyPageView()
                 .tabItem {
                     Image(systemName: "person.fill")
                     Text("마이페이지")
                 }
-                .tag(3)
+                .tag(4)
         }
         .accentColor(.blue)
         .edgesIgnoringSafeArea(.all) // 전체 화면 사용
