@@ -1,0 +1,19 @@
+{
+	"name": "xcode build server",
+	"version": "0.2",
+	"bspVersion": "2.0",
+	"languages": [
+		"c",
+		"cpp",
+		"objective-c",
+		"objective-cpp",
+		"swift"
+	],
+	"argv": [
+		"/opt/homebrew/bin/xcode-build-server"
+	],
+	"workspace": "/Users/jiwon/workspace/check-mood-umm/checkmoodumm/checkmoodumm.xcodeproj/project.xcworkspace",
+	"build_root": "/Users/jiwon/Library/Developer/Xcode/DerivedData/checkmoodumm-dhxmldzryxuaqcdcpffweuktpwmw",
+	"scheme": "checkmoodumm",
+	"kind": "xcode"
+}

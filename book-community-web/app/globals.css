@@ -1,0 +1,340 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+  --safe-area-top: 0px;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+/* 최초 로딩 시 레이아웃 일관성을 위한 스타일 */
+:root {
+  --safe-area-top: 0px;
+}
+
+/* 네이티브 앱 환경에서 초기 로딩 시 적용되는 스타일 */
+html.native-app-html,
+html[data-native-app="true"] {
+  --safe-area-top: 0px !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+html.native-app-html body,
+html[data-native-app="true"] body {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+html.native-app-html main,
+html[data-native-app="true"] main {
+  padding-top: 0 !important;
+}
+
+html.native-app-html nav,
+html[data-native-app="true"] nav,
+.native-app nav {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* 최초 로딩 시 상단 여백 설정을 위한 스타일 */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  padding-top: var(--safe-area-top);
+}
+
+/* 초기 로딩 시 깜빡임 방지를 위한 스타일 */
+html[data-native-app="true"] {
+  --safe-area-top: 0px !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+html[data-native-app="true"] body {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* 네이티브 앱 환경에서 네비게이션 바 즉시 숨기기 */
+html[data-native-app="true"] nav,
+.native-app nav {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* 상단 고정 요소들의 기본 위치 설정 */
+.fixed-top, 
+[style*="position: fixed"][style*="top"],
+header,
+nav[class*="top"],
+div[class*="header"],
+div[class*="navbar"] {
+  top: var(--safe-area-top) !important;
+}
+
+html[data-native-app="true"] .fixed-top,
+html[data-native-app="true"] [style*="position: fixed"][style*="top"],
+html[data-native-app="true"] header,
+html[data-native-app="true"] nav[class*="top"],
+html[data-native-app="true"] div[class*="header"],
+html[data-native-app="true"] div[class*="navbar"],
+html.native-app-html .fixed-top,
+html.native-app-html [style*="position: fixed"][style*="top"],
+html.native-app-html header,
+html.native-app-html nav[class*="top"],
+html.native-app-html div[class*="header"],
+html.native-app-html div[class*="navbar"] {
+  top: 0 !important;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* 네이티브 앱 환경에서 특정 UI 요소 숨기기 */
+.native-app footer {
+  /* 네이티브 앱에서는 푸터 숨기기 */
+  display: none !important;
+}
+
+/* 네이티브 앱에서는 페이지 상단 여백 조정 */
+.native-app {
+  /* 네이티브 앱에서는 상단 여백 제거 */
+  --safe-area-top: 0px !important;
+}
+
+.native-app html {
+  padding-top: 0 !important;
+}
+
+.native-app body,
+.native-app html {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.native-app main {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* 네이티브 앱에서는 페이지 하단 여백 조정 */
+.native-app main {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* 네이티브 앱에서 전체 컨테이너 조정 */
+.native-app .container {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  max-width: 100% !important;
+}
+
+/* 네이티브 앱에서 스크롤 동작 개선 */
+.native-app {
+  -webkit-overflow-scrolling: touch !important;
+  overflow-x: hidden !important;
+}
+
+/* 네이티브 앱에서 탭 UI 조정 */
+.native-app [role="tablist"] {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background-color: var(--background) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+/* 네이티브 앱에서 카드 UI 조정 */
+.native-app [class*="card"] {
+  margin-bottom: 12px !important;
+  border-radius: 12px !important;
+}
+
+/* 네이티브 앱에서 버튼 UI 조정 - 더 큰 터치 영역 */
+.native-app button, 
+.native-app [role="button"],
+.native-app a[href] {
+  min-height: 44px !important; /* iOS 권장 최소 터치 영역 */
+}
+
+/* 네이티브 앱에서 입력 필드 UI 조정 */
+.native-app input,
+.native-app textarea,
+.native-app select {
+  font-size: 16px !important; /* iOS에서 자동 확대 방지 */
+}
+
+/* 스크롤 위치에 따른 UI 조정을 위한 스타일 */
+.native-app .scroll-up-header {
+  transform: translateY(0) !important;
+  transition: transform 0.3s ease-in-out !important;
+}
+
+.native-app .scroll-down-header {
+  transform: translateY(-100%) !important;
+  transition: transform 0.3s ease-in-out !important;
+}
+
+/* 스크롤 위치에 따른 컨텐츠 영역 조정 */
+.native-app .content-with-hidden-header {
+  padding-top: 0 !important;
+  transition: padding-top 0.3s ease-in-out !important;
+}
+
+.native-app .content-with-visible-header {
+  padding-top: 60px !important; /* 헤더 높이에 맞게 조정 */
+  transition: padding-top 0.3s ease-in-out !important;
+}
+
+/* 스크롤 위치에 따른 플로팅 버튼 위치 조정 */
+.native-app .floating-button-with-hidden-navbar {
+  bottom: 20px !important;
+  transition: bottom 0.3s ease-in-out !important;
+}
+
+.native-app .floating-button-with-visible-navbar {
+  bottom: 80px !important; /* 네비게이션 바 높이에 맞게 조정 */
+  transition: bottom 0.3s ease-in-out !important;
+}
+
+/* 네이티브 앱에서 상단 고정 요소들의 위치 조정 */
+.native-app .fixed-top, 
+.native-app [style*="position: fixed"][style*="top"],
+.native-app header,
+.native-app nav[class*="top"],
+.native-app div[class*="header"],
+.native-app div[class*="navbar"] {
+  top: 0 !important;
+}
