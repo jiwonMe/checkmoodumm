@@ -291,6 +291,7 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
         userContentController.add(self, name: "notification")
         userContentController.add(self, name: "bookInfo")
         userContentController.add(self, name: "nativeUI")
+        userContentController.add(self, name: "navigation")
         
         configuration.userContentController = userContentController
         configuration.websiteDataStore = .default()
@@ -505,6 +506,8 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
             handleBookInfo(messageBody)
         case "nativeUI":
             handleNativeUI(messageBody)
+        case "navigation":
+            handleNavigation(messageBody)
         default:
             print("Unknown message: \(message.name)")
         }
@@ -586,12 +589,51 @@ class WebViewManager: NSObject, ObservableObject, WKNavigationDelegate, WKScript
                 case "forward":
                     // 앞으로가기 처리
                     break
+                case "switchTab":
+                    if let tabName = data["tabName"] as? String {
+                        switchToNativeTab(tabName: tabName)
+                    }
                 default:
                     print("Unknown navigation action: \(action)")
                 }
             }
         default:
             print("Unknown nativeUI type: \(type)")
+        }
+    }
+    
+    // 네비게이션 처리
+    private func handleNavigation(_ data: [String: Any]) {
+        if let tabName = data["tabName"] as? String {
+            switchToNativeTab(tabName: tabName)
+        }
+    }
+    
+    // 네이티브 탭 전환 함수
+    private func switchToNativeTab(tabName: String) {
+        var tabIndex = 0
+        
+        switch tabName.lowercased() {
+        case "home":
+            tabIndex = 0
+        case "search":
+            tabIndex = 1
+        case "community":
+            tabIndex = 2
+        case "mypage":
+            tabIndex = 3
+        default:
+            print("Unknown tab name: \(tabName)")
+            return
+        }
+        
+        // 메인 스레드에서 탭 전환 알림 발송
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: NSNotification.Name("SwitchToTab"),
+                object: nil,
+                userInfo: ["tabIndex": tabIndex]
+            )
         }
     }
 } 

@@ -58,6 +58,28 @@ struct MainTabView: View {
         }
         .accentColor(.blue)
         .edgesIgnoringSafeArea(.all) // 전체 화면 사용
+        .onAppear {
+            // 탭 전환 알림 관찰자 등록
+            setupNotificationObservers()
+        }
+    }
+    
+    // 알림 관찰자 설정
+    private func setupNotificationObservers() {
+        // 기존 관찰자 제거
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name("SwitchToTab"), object: nil)
+        
+        // 새 관찰자 등록
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("SwitchToTab"),
+            object: nil,
+            queue: .main
+        ) { notification in
+            if let userInfo = notification.userInfo,
+               let tabIndex = userInfo["tabIndex"] as? Int {
+                self.selectedTab = tabIndex
+            }
+        }
     }
 }
 

@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { SearchButton } from "./components/SearchButton";
+import { CommunityButton } from "./components/CommunityButton";
+import { NativeLink } from "@/components/ui/native-link";
 
 // 추천 도서 데이터 (실제로는 API에서 가져올 것)
 const featuredBooks = [
@@ -97,12 +100,8 @@ export default function HomePage() {
               /* 버튼 그룹 */
               "flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0",
             )}>
-              <Button asChild size="lg">
-                <Link href="/search">도서 검색하기</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/community">커뮤니티 참여하기</Link>
-              </Button>
+              <SearchButton />
+              <CommunityButton />
             </div>
           </div>
           <div className={cn(
@@ -139,7 +138,7 @@ export default function HomePage() {
             추천 도서
           </h2>
           <Button asChild variant="link">
-            <Link href="/search">더 보기</Link>
+            <NativeLink href="/search" nativeTab="search">더 보기</NativeLink>
           </Button>
         </div>
         <div className={cn(
@@ -187,7 +186,7 @@ export default function HomePage() {
                   /* 버튼 스타일 */
                   "w-full",
                 )}>
-                  <Link href={`/book/${book.id}`}>자세히 보기</Link>
+                  <NativeLink href={`/book/${book.id}`} nativeTab="search">자세히 보기</NativeLink>
                 </Button>
               </CardFooter>
             </Card>
@@ -211,7 +210,7 @@ export default function HomePage() {
             최신 게시글
           </h2>
           <Button asChild variant="link">
-            <Link href="/community">더 보기</Link>
+            <NativeLink href="/community" nativeTab="community">더 보기</NativeLink>
           </Button>
         </div>
         <div className={cn(
@@ -228,12 +227,16 @@ export default function HomePage() {
                   /* 제목 스타일 */
                   "text-lg",
                 )}>
-                  <Link href={`/community/post/${post.id}`} className={cn(
-                    /* 링크 스타일 */
-                    "hover:underline",
-                  )}>
+                  <NativeLink 
+                    href={`/community/post/${post.id}`} 
+                    nativeTab="community"
+                    className={cn(
+                      /* 링크 스타일 */
+                      "hover:underline",
+                    )}
+                  >
                     {post.title}
-                  </Link>
+                  </NativeLink>
                 </CardTitle>
                 <CardDescription>
                   {post.author} • {post.date} • 댓글 {post.comments}개
